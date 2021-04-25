@@ -1,24 +1,29 @@
 import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
 import { Injectable } from '@nestjs/common';
-import { Messasing } from 'src/app/models/messasing';
+import { LogRequest } from 'src/app/models/log-request/log-request';
+import { Messasing } from '../../../app/models/messasing/messasing';
 
 @Injectable()
 export class MessasingService {
     constructor(private readonly amqpConnection: AmqpConnection) { }
 
-    async publish(messasing: Messasing) {
+    async publish(id: number) {
         await this.amqpConnection.publish(
             'exchange_queue_1', 
             'subscribe-route', 
-            messasing
+            {
+                id: id
+            }
         );
     }
 
-    async rpc(messasing: Messasing) {
+    async rpc(id: number) {
         return await this.amqpConnection.request<Messasing>({
             exchange: 'exchange_queue_1', 
             routingKey: 'rpc-route', 
-            payload: messasing
+            payload: {
+                id: id
+            }
         })
     }
 }
